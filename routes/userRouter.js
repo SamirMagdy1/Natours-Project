@@ -8,6 +8,7 @@ const router = express.Router();
 router.post('/signup', authControllers.signup);
 router.post('/login', authControllers.login);
 router.get('/logout', authControllers.logout);
+
 router.post('/forgotPassword', authControllers.forgotPassword);
 router.patch('/resetPassword/:token', authControllers.resetPassword);
 
@@ -22,7 +23,12 @@ router.get(
   userControllers.getMe, // to set id in params "faking"
   userControllers.getUser, // to get the user by id in params
 );
-router.patch('/updateMe', userControllers.updateMe);
+router.patch(
+  '/updateMe',
+  userControllers.uploadUserPhoto,
+  userControllers.resizeUserPhoto,
+  userControllers.updateMe,
+);
 router.delete('/deleteMe', userControllers.deleteMe);
 
 router.use(authControllers.restrictTo('admin'));
