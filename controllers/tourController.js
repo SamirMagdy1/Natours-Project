@@ -28,7 +28,6 @@ exports.uploadTourImages = upload.fields([
   { name: 'imageCover', maxCount: 1 },
   { name: 'images', maxCount: 3 },
 ]);
-console.log('hello');
 
 exports.resizeTourImages = (req, res, next) => {
   console.log(req.files);
