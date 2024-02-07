@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/userModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
-const sendEmail = require('../utils/email');
+const Email = require('../utils/email');
 
 const signToken = (id) =>
   jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -47,6 +47,11 @@ exports.signup = catchAsync(async (req, res, next) => {
   // creating new doc in our db
   const newUser = await User.create(req.body);
 
+  // Sending Welcome Email
+  const url = `${req.protocol}://${req.get('host')}/me`;
+  console.log(url);
+  await new Email(newUser, url).sendWelcome();
+
   // THE RIGHT WAY TO DISPLAY DATA
   // ({
   //   name: req.body.name,
@@ -56,7 +61,6 @@ exports.signup = catchAsync(async (req, res, next) => {
   //   role: req.body.role,
   //   //passwordChangedAt: req.body.passwordChangedAt,
   // });
-
   createSendToken(newUser, 201, res);
 });
 
@@ -195,19 +199,21 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   // to turn off our validators in schema
   await user.save({ validateBeforeSave: false });
 
-  //3) Send it to user's email
-  const resetURL = `${req.protocol}://${req.get(
-    'host',
-  )}/api/v1/users/resetPassword/${resetToken}`;
-
-  const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: ${resetURL}\nIf you didn't forget your password, please ignore this email`;
+  // const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: ${resetURL}\nIf you didn't forget your password, please ignore this email`;
 
   try {
-    await sendEmail({
-      email: user.email,
-      subject: 'Your password reset token (valid for 10 min)',
-      message,
-    });
+    //3) Send it to user's email
+    const resetURL = `${req.protocol}://${req.get(
+      'host',
+    )}/api/v1/users/resetPassword/${resetToken}`;
+
+    // await sendEmail({
+    //   email: user.email,
+    //   subject: 'Your password reset token (valid for 10 min)',
+    //   message,
+    // });
+
+    await new Email(user, resetURL).sendPassword();
 
     res.status(200).json({
       status: 'success',
