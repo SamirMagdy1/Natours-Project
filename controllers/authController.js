@@ -49,7 +49,7 @@ exports.signup = catchAsync(async (req, res, next) => {
 
   // Sending Welcome Email
   const url = `${req.protocol}://${req.get('host')}/me`;
-  console.log(url);
+  // console.log(url);
   await new Email(newUser, url).sendWelcome();
 
   // THE RIGHT WAY TO DISPLAY DATA
