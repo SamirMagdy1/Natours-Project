@@ -12,16 +12,15 @@ module.exports = class Email {
 
   newTransport() {
     if (process.env.NODE_ENV === 'production') {
-      //   // sendGrid
-      return 1;
-      // nodemailer.createTransport({
-      //     host: 'smtp-relay.brevo.com',
-      //     port: 587,
-      //     auth: {
-      //       user: 'Master Password',
-      //       pass: 'X5UmzPI2D9h3Bcb1',
-      //     },
-      //   });
+      // Sending emails with BREVO
+      return nodemailer.createTransport({
+        host: process.env.BREVO_HOST,
+        port: process.env.BREVO_PORT,
+        auth: {
+          user: process.env.BREVO_USER,
+          pass: process.env.BREVO_PASSWORD,
+        },
+      });
     }
 
     return nodemailer.createTransport({
