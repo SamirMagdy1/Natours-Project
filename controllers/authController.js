@@ -11,7 +11,7 @@ const signToken = (id) =>
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
 
-const createSendToken = (user, statusCode, res) => {
+const createSendToken = (user, statusCode, req, res) => {
   const token = signToken(user._id);
 
   const cookieOptions = {
@@ -25,9 +25,10 @@ const createSendToken = (user, statusCode, res) => {
 
     // httpOnly option, the cookie can not be accessed or modified in any way by the browser, to prevent those cross-site scripting attacks
     httpOnly: true,
-  };
 
-  if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
+    // Change if condition from process.env.NODE_ENV === 'production' to
+    secure: req.secure || req.headers['x-forwarded-proto'] === 'https',
+  };
 
   res.cookie('jwt', token, cookieOptions);
 
@@ -61,7 +62,7 @@ exports.signup = catchAsync(async (req, res, next) => {
   //   role: req.body.role,
   //   //passwordChangedAt: req.body.passwordChangedAt,
   // });
-  createSendToken(newUser, 201, res);
+  createSendToken(newUser, 201, req, res);
 });
 
 exports.login = catchAsync(async (req, res, next) => {
@@ -81,7 +82,7 @@ exports.login = catchAsync(async (req, res, next) => {
   }
 
   //3) if everything ok, sent token to client
-  createSendToken(user, 200, res);
+  createSendToken(user, 200, req, res);
 });
 
 // log out user
@@ -263,7 +264,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
 
   // 3) Update changedPasswordAt property for the user
   // 4) Log the user in, send jwt
-  createSendToken(user, 200, res);
+  createSendToken(user, 200, req, res);
 });
 
 exports.updatePassword = catchAsync(async (req, res, next) => {
@@ -281,5 +282,5 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   await user.save();
 
   // 4) Log user in, send jwt
-  createSendToken(user, 200, res);
+  createSendToken(user, 200, req, res);
 });

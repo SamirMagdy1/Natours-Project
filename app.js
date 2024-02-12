@@ -21,6 +21,9 @@ const viewRouter = require('./routes/viewRouter');
 
 const app = express();
 
+// for https testing in 14.7
+app.enable('trust proxy');
+
 // setting up templet engine
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
